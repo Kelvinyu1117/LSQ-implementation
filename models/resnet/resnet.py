@@ -352,3 +352,18 @@ def wide_resnet101_2(pretrained=False, progress=True, **kwargs):
     kwargs['width_per_group'] = 64 * 2
     return _resnet('wide_resnet101_2', Bottleneck, [3, 4, 23, 3],
                    pretrained, progress, **kwargs)
+
+
+def resnet_18_cifar():
+    r"""
+        Modify the resnet 18 network in order to run on cifar-10 dataset
+
+        To enhance the accuracy, the (kernel_size, stride, padding) of conv1 is modified to (3, 1, 1)
+        referenced by <https://github.com/akamaster/pytorch_resnet_cifar10>  
+    """
+    model = ResNet(block=BasicBlock, layers=[2, 2, 2, 2], num_classes=10)
+
+    model.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1,
+                            bias=False)
+
+    return model
