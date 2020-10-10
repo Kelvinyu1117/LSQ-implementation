@@ -11,3 +11,11 @@ This is an unofficial Pytorch implementation of the paper: <a href="https://arxi
       primaryClass={cs.LG}
 }
 ```
+
+# Jupyter Notebook Demostration on Google Colab
+
+| Notebook                                     | Colab                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Training and Testing of ResNet 18 on CIFAR10 | https://colab.research.google.com/drive/1OFcPBY7gxCsi0o27CAarlyggD7N42lu9?usp=sharing |
+
+
