@@ -1,3 +1,6 @@
+import torch
+
+
 class LSQ_Quantizer(torch.nn.Module):
     def __init__(self, bits, is_activation=False):
         super(LSQ_Quantizer, self).__init__()
@@ -11,7 +14,7 @@ class LSQ_Quantizer(torch.nn.Module):
             self.Qn = -2**(bits - 1)
             self.Qp = 2 ** (bits - 1) - 1
 
-        self.s = torch.nn.Parameter(torch.tensor(1.0))
+        self.s = torch.nn.Parameter(torch.Tensor(1.0))
 
     def init_step_size(self, x):
         self.s = torch.nn.Parameter(
