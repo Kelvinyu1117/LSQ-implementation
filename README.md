@@ -12,7 +12,7 @@ This is an unofficial Pytorch implementation of the paper: <a href="https://arxi
 }
 ```
 
-# Jupyter Notebook Demonstration on Google Colab
+## Jupyter Notebook Demonstration on Google Colab
 
 | Notebook                                     | Colab                                                                                 |
 | -------------------------------------------- | ------------------------------------------------------------------------------------- |
