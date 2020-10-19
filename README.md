@@ -1,6 +1,6 @@
 # LSQ-implementation
 This is an unofficial Pytorch implementation of the paper: <a href="https://arxiv.org/abs/1902.08153">LEARNED STEP SIZE QUANTIZATION</a> at ICLR 2020
-
+(NOT complete Yet)
 ```
 @misc{esser2020learned,
       title={Learned Step Size Quantization}, 
@@ -12,7 +12,7 @@ This is an unofficial Pytorch implementation of the paper: <a href="https://arxi
 }
 ```
 
-# Jupyter Notebook Demonstration on Google Colab
+## Jupyter Notebook Demonstration on Google Colab
 
 | Notebook                                     | Colab                                                                                 |
 | -------------------------------------------- | ------------------------------------------------------------------------------------- |
