@@ -19,3 +19,7 @@ This is an unofficial Pytorch implementation of the paper: <a href="https://arxi
 | Training and Testing of ResNet 18 on CIFAR10 | https://colab.research.google.com/drive/1OFcPBY7gxCsi0o27CAarlyggD7N42lu9?usp=sharing |
 
 
+## References
+The implementation from zhutmost
+
+https://github.com/zhutmost/lsq-net
