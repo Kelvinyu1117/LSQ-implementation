@@ -20,6 +20,5 @@ This is an unofficial Pytorch implementation of the paper: <a href="https://arxi
 
 
 ## References
-The implementation from zhutmost
 
-https://github.com/zhutmost/lsq-net
+* The implementation by zhutmost: https://github.com/zhutmost/lsq-net
