@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from quantizer.layers import LSQ_Conv2D, LSQ_Linear
+from quantizer.lsq import LSQ_Quantizer
 
 
 class LeNet5(nn.Module):
@@ -34,3 +36,22 @@ class LeNet5(nn.Module):
         x = self.f7(x)
 
         return x
+
+
+def QuantLeNet5(model, bits=8, n_classes=10):
+    model.c1 = LSQ_Conv2D(model.c1, 8,
+                          LSQ_Quantizer(bits, False), LSQ_Quantizer(bits, False))
+
+    model.c3 = LSQ_Conv2D(model.c3,
+                          bits,  LSQ_Quantizer(bits, False), LSQ_Quantizer(bits, True))
+
+    model.c5 = LSQ_Conv2D(model.c5, bits,  LSQ_Quantizer(
+        bits, False), LSQ_Quantizer(bits, True))
+
+    model.f6 = LSQ_Linear(model.f6, bits,  LSQ_Quantizer(
+        bits, False), LSQ_Quantizer(bits, True))
+
+    model.f7 = LSQ_Linear(model.f7, 8,  LSQ_Quantizer(
+        bits, False), LSQ_Quantizer(bits, True))
+
+    return model

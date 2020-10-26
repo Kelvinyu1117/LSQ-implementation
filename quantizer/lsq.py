@@ -14,7 +14,7 @@ class LSQ_Quantizer(torch.nn.Module):
             self.Qn = -2**(bits - 1)
             self.Qp = 2 ** (bits - 1) - 1
 
-        self.s = torch.nn.Parameter(torch.Tensor(1.0))
+        self.s = torch.nn.Parameter(torch.Tensor([1.0]))
 
     def init_step_size(self, x):
         self.s = torch.nn.Parameter(
@@ -24,14 +24,14 @@ class LSQ_Quantizer(torch.nn.Module):
         y_out = x
         y_grad = x * scale
 
-        y = (y_out - y_grad).detach() + y_grad
+        y = y_out.detach() - y_grad.detach() + y_grad
 
         return y
 
     def round_pass(self, x):
         y_out = x.round()
         y_grad = x
-        y = (y_out - y_grad).detach() + y_grad
+        y = y_out.detach() - y_grad.detach() + y_grad
 
         return y
 

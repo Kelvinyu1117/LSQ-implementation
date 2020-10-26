@@ -26,9 +26,12 @@ class LSQ_Conv2D(torch.nn.Conv2d):
 
     def forward(self, x):
         quantized_weight = self.weight_quantizer(self.weight)
+
         quantized_act = self.act_quantizer(x)
 
-        return self._conv_forward(quantized_act, quantized_weight)
+        # quantized_act = x
+
+        return F.conv2d(quantized_act, quantized_weight, self.bias, self.stride, self.padding, self.dilation, self.groups)
 
 
 class LSQ_Linear(torch.nn.Linear):
@@ -48,4 +51,7 @@ class LSQ_Linear(torch.nn.Linear):
     def forward(self, x):
         quantized_weight = self.weight_quantizer(self.weight)
         quantized_act = self.act_quantizer(x)
+
+        # quantized_act = x
+
         return F.linear(quantized_act, quantized_weight, self.bias)

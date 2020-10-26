@@ -12,10 +12,10 @@ This is an unofficial Pytorch implementation of the paper: <a href="https://arxi
 }
 ```
 
-## Jupyter Notebook Demonstration on Google Colab
+## Experimental Result
 
-| Notebook                                     | Colab                                                                                 |
-| -------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Training and Testing of ResNet 18 on CIFAR10 | https://colab.research.google.com/drive/1OFcPBY7gxCsi0o27CAarlyggD7N42lu9?usp=sharing |
-
+| Network   | Dataset  | Original Accuracy |
+| --------- | -------- | ----------------- |
+| LeNet-5   | MNIST    |                   |
+| ResNet-18 | CIFAR-10 |                   |
 

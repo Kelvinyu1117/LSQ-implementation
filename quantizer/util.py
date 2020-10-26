@@ -1,8 +1,9 @@
 import torch
-from lsq import LSQ_Quantizer
+from .lsq import LSQ_Quantizer
+from .layers import LSQ_Conv2D, LSQ_Linear
 
 
-def replace_conv2D_module(model, new_conv2d, bits=8):
+def replace_conv2D_module(model, new_conv2d=LSQ_Conv2D, bits=8):
     for attr_str in dir(model):
         target = getattr(model, attr_str)
         if(type(target) == torch.nn.Conv2d):
@@ -13,7 +14,7 @@ def replace_conv2D_module(model, new_conv2d, bits=8):
         replace_conv2D_module(module, new_conv2d)
 
 
-def replace_linear_module(model, new_linear, bits=8):
+def replace_linear_module(model, new_linear=LSQ_Linear, bits=8):
     for attr_str in dir(model):
         target = getattr(model, attr_str)
         if(type(target) == torch.nn.Linear):

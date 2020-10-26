@@ -10,6 +10,7 @@ from torch.utils.data import random_split
 import pickle as pk
 import matplotlib.pyplot as plt
 from models import lenet
+from quantizer import util
 import numpy as np
 
 
@@ -109,8 +110,8 @@ def train(model, criterion, optimizer, train_loader, val_loader, save_path, epoc
         history['val_loss'].append(epoch_val_loss)
         history['val_accuracy'].append(epoch_val_accuracy)
 
-        if(epoch_val_accuracy > 90):
-            torch.save(model.state_dict(), save_path + f'-e{epoch}')
+        if(epoch_val_accuracy > 0.9):
+            torch.save(model.state_dict(), save_path + f'e{epoch}.pth')
 
     return history
 
@@ -196,22 +197,23 @@ def load_mnist():
     return trainLoader, val_loader, testLoader
 
 
-if __name__ == "__main__":
+def train_original():
     train_loader, val_loader, test_loader = load_mnist()
 
     # setup
     use_gpu = torch.cuda.is_available()
     epoch = 20
-    lr = 0.01
-    save_path = './results/lenet/lenet-weights'
+    lr = 0.001
+    save_path = './results/lenet/lenet-'
+    weights_save_path = './results/lenet/lenet-weights-'
 
     # model and optimizer
     model = lenet.LeNet5()
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     history = train(model, criterion, optimizer, train_loader,
-                    val_loader, save_path, epoch, use_gpu)
+                    val_loader, weights_save_path, epoch, use_gpu)
 
     test_loss, test_accuracy = test(
         model, criterion, test_loader, torch.cuda.is_available())
@@ -219,3 +221,37 @@ if __name__ == "__main__":
     history['test_accuracy'] = test_accuracy
 
     save_params(history, epoch, save_path, lr)
+
+
+def train_lsq():
+    train_loader, val_loader, test_loader = load_mnist()
+
+    # setup
+    use_gpu = torch.cuda.is_available()
+    epoch = 1
+    lr = 0.001
+
+    save_path = './results/lenet/lenet-lsq-'
+    weights_save_path = './results/lenet/lenet-lsq-weights-'
+
+    # model and optimizer
+    model = lenet.LeNet5()
+    model.load_state_dict(torch.load('./weights/lenet-weights-e20'))
+
+    model = lenet.QuantLeNet5(model, 8, 10)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    history = train(model, criterion, optimizer, train_loader,
+                    val_loader, weights_save_path, epoch, use_gpu)
+
+    test_loss, test_accuracy = test(
+        model, criterion, test_loader, torch.cuda.is_available())
+    history['test_loss'] = test_loss
+    history['test_accuracy'] = test_accuracy
+
+    save_params(history, epoch, save_path, lr)
+
+
+if __name__ == "__main__":
+    train_lsq()
