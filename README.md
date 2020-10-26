@@ -19,3 +19,6 @@ This is an unofficial Pytorch implementation of the paper: <a href="https://arxi
 | LeNet-5   | MNIST    |                   |
 | ResNet-18 | CIFAR-10 |                   |
 
+## References
+
+* The implementation by zhutmost: https://github.com/zhutmost/lsq-net
