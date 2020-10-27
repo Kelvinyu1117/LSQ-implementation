@@ -163,7 +163,7 @@ def load_mnist():
         [
             transforms.Resize((32, 32)),
             transforms.ToTensor(),
-            transforms.Normalize((0.5,), (0.5,)),
+            transforms.Normalize(mean=(0.5, ), std=(0.5,))
         ]
     )
 
@@ -202,7 +202,7 @@ def train_original():
 
     # setup
     use_gpu = torch.cuda.is_available()
-    epoch = 20
+    epoch = 10
     lr = 0.001
     save_path = './results/lenet/lenet-'
     weights_save_path = './results/lenet/lenet-weights-'
@@ -230,15 +230,17 @@ def train_lsq():
     use_gpu = torch.cuda.is_available()
     epoch = 1
     lr = 0.001
+    bits = 3
 
-    save_path = './results/lenet/lenet-lsq-'
-    weights_save_path = './results/lenet/lenet-lsq-weights-'
+    save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-'
+    weights_save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-weights-'
 
     # model and optimizer
     model = lenet.LeNet5()
-    model.load_state_dict(torch.load('./weights/lenet-weights-e20'))
+    model.load_state_dict(torch.load('./weights/lenet-weights-e10.pth'))
 
-    model = lenet.QuantLeNet5(model, 8, 10)
+    model = lenet.QuantLeNet5(model, bits)
+
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 

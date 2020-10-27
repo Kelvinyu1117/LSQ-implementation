@@ -50,6 +50,7 @@ class LSQ_Linear(torch.nn.Linear):
 
     def forward(self, x):
         quantized_weight = self.weight_quantizer(self.weight)
+
         quantized_act = self.act_quantizer(x)
 
         # quantized_act = x
