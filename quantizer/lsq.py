@@ -38,12 +38,12 @@ class LSQ_Quantizer(torch.nn.Module):
     def forward(self, x):
         scale_factor = 1 / (x.numel() * self.Qp) ** 0.5
 
-        s = self.grad_scale(self.s, scale_factor)
-        x = x / s
+        scale = self.grad_scale(self.s, scale_factor)
+        x = x / scale
         x = x.clamp(self.Qn, self.Qp)
 
         x_bar = self.round_pass(x)
 
-        x_hat = x_bar * self.s
+        x_hat = x_bar * scale
 
         return x_hat

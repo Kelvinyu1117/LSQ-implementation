@@ -40,7 +40,7 @@ class LeNet5(nn.Module):
 
 def QuantLeNet5(model, bits=8, n_classes=10):
     model.c1 = LSQ_Conv2D(model.c1, bits,
-                          LSQ_Quantizer(8, False), LSQ_Quantizer(8, False))
+                          LSQ_Quantizer(8, False), LSQ_Quantizer(8, True))
 
     model.c3 = LSQ_Conv2D(model.c3,
                           bits,  LSQ_Quantizer(bits, False), LSQ_Quantizer(bits, True))

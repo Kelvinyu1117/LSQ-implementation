@@ -228,9 +228,9 @@ def train_lsq():
 
     # setup
     use_gpu = torch.cuda.is_available()
-    epoch = 1
+    epoch = 10
     lr = 0.001
-    bits = 3
+    bits = 2
 
     save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-'
     weights_save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-weights-'
@@ -253,6 +253,8 @@ def train_lsq():
     history['test_accuracy'] = test_accuracy
 
     save_params(history, epoch, save_path, lr)
+
+    print([(n, m) for n, m in model.named_parameters()])
 
 
 if __name__ == "__main__":
