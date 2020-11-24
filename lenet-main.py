@@ -10,6 +10,7 @@ from torch.utils.data import random_split
 import pickle as pk
 import matplotlib.pyplot as plt
 from models import lenet
+from models.brevitas_models import quant_lenet
 from quantizer import util
 import numpy as np
 
@@ -257,5 +258,42 @@ def train_lsq():
     print([(n, m) for n, m in model.named_parameters()])
 
 
+def train_brevitas():
+    train_loader, val_loader, test_loader = load_mnist()
+
+    # setup
+    use_gpu = torch.cuda.is_available()
+    epoch = 10
+    lr = 0.001
+    bits = 2
+
+    save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-'
+    weights_save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-weights-'
+
+    weights = torch.load('./weights/lenet-weights-e10.pth')
+
+    # # model and optimizer
+    model = quant_lenet.QuantLeNet()
+    print(model)
+    # model.load_state_dict(torch.load('./weights/lenet-weights-e10.pth'))
+
+    # model = lenet.QuantLeNet5(model, bits)
+
+    # criterion = nn.CrossEntropyLoss()
+    # optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    # history = train(model, criterion, optimizer, train_loader,
+    #                 val_loader, weights_save_path, epoch, use_gpu)
+
+    # test_loss, test_accuracy = test(
+    #     model, criterion, test_loader, torch.cuda.is_available())
+    # history['test_loss'] = test_loss
+    # history['test_accuracy'] = test_accuracy
+
+    # save_params(history, epoch, save_path, lr)
+
+    # print([(n, m) for n, m in model.named_parameters()])
+
+
 if __name__ == "__main__":
-    train_lsq()
+    train_brevitas()
