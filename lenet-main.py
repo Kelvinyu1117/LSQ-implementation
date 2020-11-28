@@ -114,6 +114,9 @@ def train(model, criterion, optimizer, train_loader, val_loader, save_path, epoc
         if(epoch_val_accuracy > 0.9):
             torch.save(model.state_dict(), save_path + f'e{epoch}.pth')
 
+        # print([(n, m)
+        #        for n, m in model.named_parameters() if 'quantizer' in n])
+
     return history
 
 
@@ -229,9 +232,9 @@ def train_lsq():
 
     # setup
     use_gpu = torch.cuda.is_available()
-    epoch = 10
+    epoch = 3
     lr = 0.001
-    bits = 2
+    bits = 8
 
     save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-'
     weights_save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-weights-'
@@ -263,9 +266,9 @@ def train_brevitas():
 
     # setup
     use_gpu = torch.cuda.is_available()
-    epoch = 10
+    epoch = 20
     lr = 0.001
-    bits = 2
+    bits = 8
 
     save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-'
     weights_save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-weights-'
@@ -274,21 +277,21 @@ def train_brevitas():
 
     # # model and optimizer
     model = quant_lenet.QuantLeNet()
-    print(model)
+    # print(model)
     # model.load_state_dict(torch.load('./weights/lenet-weights-e10.pth'))
 
     # model = lenet.QuantLeNet5(model, bits)
 
-    # criterion = nn.CrossEntropyLoss()
-    # optimizer = optim.Adam(model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # history = train(model, criterion, optimizer, train_loader,
-    #                 val_loader, weights_save_path, epoch, use_gpu)
+    history = train(model, criterion, optimizer, train_loader,
+                    val_loader, weights_save_path, epoch, use_gpu)
 
-    # test_loss, test_accuracy = test(
-    #     model, criterion, test_loader, torch.cuda.is_available())
-    # history['test_loss'] = test_loss
-    # history['test_accuracy'] = test_accuracy
+    test_loss, test_accuracy = test(
+        model, criterion, test_loader, torch.cuda.is_available())
+    history['test_loss'] = test_loss
+    history['test_accuracy'] = test_accuracy
 
     # save_params(history, epoch, save_path, lr)
 
@@ -296,4 +299,5 @@ def train_brevitas():
 
 
 if __name__ == "__main__":
+    # train_lsq()
     train_brevitas()
