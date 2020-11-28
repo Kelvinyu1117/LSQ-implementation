@@ -1,1 +1,0 @@
-sudo docker run --gpus all -it -v /host/data:/data -v /host/config:/config dl-img bash
