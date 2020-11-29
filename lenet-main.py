@@ -266,7 +266,7 @@ def train_brevitas():
 
     # setup
     use_gpu = torch.cuda.is_available()
-    epoch = 20
+    epoch = 2
     lr = 0.001
     bits = 8
 

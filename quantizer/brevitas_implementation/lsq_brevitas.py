@@ -7,7 +7,7 @@ class LSQ_Quantizer(torch.nn.Module):
     def __init__(self, bit_width, is_activation=False):
         super(LSQ_Quantizer, self).__init__()
 
-        self.bit_width = torch.Tensor([bit_width])
+        self.bit_width = bit_width
 
         if(is_activation):
             self.Qn = 0
@@ -45,7 +45,7 @@ class LSQ_Quantizer(torch.nn.Module):
 
         x_hat = x_bar * scale
 
-        return x_hat, self.s, self.bit_width
+        return x_hat, self.s, torch.Tensor([self.bit_width])
 
 
 class LSQ_weight_quant_8bits(BaseInjector):
