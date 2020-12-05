@@ -45,7 +45,7 @@ class LSQ_Quantizer(torch.nn.Module):
 
         x_hat = x_bar * scale
 
-        return x_hat, self.s, torch.Tensor([self.bit_width])
+        return x_hat, scale, torch.Tensor([self.bit_width])
 
 
 class LSQ_weight_quant_8bits(BaseInjector):

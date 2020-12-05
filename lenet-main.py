@@ -206,7 +206,7 @@ def train_original():
 
     # setup
     use_gpu = torch.cuda.is_available()
-    epoch = 10
+    epoch = 1
     lr = 0.001
     save_path = './results/lenet/lenet-'
     weights_save_path = './results/lenet/lenet-weights-'
@@ -224,7 +224,9 @@ def train_original():
     history['test_loss'] = test_loss
     history['test_accuracy'] = test_accuracy
 
-    save_params(history, epoch, save_path, lr)
+    # save_params(history, epoch, save_path, lr)
+
+    print([(n, m) for n, m in model.named_parameters()])
 
 
 def train_lsq():
@@ -261,26 +263,55 @@ def train_lsq():
     print([(n, m) for n, m in model.named_parameters()])
 
 
-def train_brevitas():
+def train_brevitas_non_quantized():
     train_loader, val_loader, test_loader = load_mnist()
 
     # setup
     use_gpu = torch.cuda.is_available()
-    epoch = 2
+    epoch = 10
     lr = 0.001
     bits = 8
 
-    save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-'
-    weights_save_path = f'./results/lenet/lenet-lsq-w{bits}a{bits}-weights-'
-
-    weights = torch.load('./weights/lenet-weights-e10.pth')
+    save_path = f'./results/lenet/lenet-lsq-brevitas-w{bits}a{bits}-'
+    weights_save_path = f'./results/lenet/lenet-lsq-brevitas-w{bits}a{bits}-weights-'
 
     # # model and optimizer
-    model = quant_lenet.QuantLeNet()
-    # print(model)
-    # model.load_state_dict(torch.load('./weights/lenet-weights-e10.pth'))
+    model = quant_lenet.get_non_quantized_lenet()
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # model = lenet.QuantLeNet5(model, bits)
+    history = train(model, criterion, optimizer, train_loader,
+                    val_loader, weights_save_path, epoch, use_gpu)
+
+    test_loss, test_accuracy = test(
+        model, criterion, test_loader, torch.cuda.is_available())
+    history['test_loss'] = test_loss
+    history['test_accuracy'] = test_accuracy
+
+    save_params(history, epoch, save_path, lr)
+
+    print([(n, m) for n, m in model.named_parameters()])
+
+
+def train_brevitas_8bits():
+
+    train_loader, val_loader, test_loader = load_mnist()
+
+    # setup
+    use_gpu = torch.cuda.is_available()
+    epoch = 1
+    lr = 0.001
+    bits = 8
+
+    save_path = f'./results/lenet/lenet-lsq-brevitas-q-w{bits}a{bits}-'
+    weights_save_path = f'./results/lenet/lenet-lsq-brevitas-q-w{bits}a{bits}-weights-'
+
+    # # model and optimizer
+    model = quant_lenet.get_8_bits_quantized_lenet()
+    model.load_state_dict(torch.load(
+        './weights/lenet-lsq-brevitas-w8a8-weights-e9.pth'), strict=False)
+
+    print([(n, m) for n, m in model.named_parameters()])
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -295,9 +326,12 @@ def train_brevitas():
 
     # save_params(history, epoch, save_path, lr)
 
-    # print([(n, m) for n, m in model.named_parameters()])
+    print([(n, m) for n, m in model.named_parameters()])
 
 
 if __name__ == "__main__":
     # train_lsq()
-    train_brevitas()
+    # train_brevitas_non_quantized()
+
+    # train_original()
+    train_brevitas_8bits()
