@@ -51,25 +51,31 @@ def get_non_quantized_lenet():
 def get_8_bits_quantized_lenet():
     model = QuantLeNet()
     model.conv1 = QuantConv2d(
-        1, 6, 5, weight_quant=None, input_quant=None, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+        1, 6, 5, weight_quant=LSQ_weight_quant_8bits, bias_quant=None, input_quant=None, output_quant=None, update_wqi=None, update_bqi=None, update_iqi=None, update_oqi=None)
     model.relu1 = QuantReLU(
-        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
-    model.conv2 = QuantConv2d(6, 16, 5, weight_quant=None,
-                              input_quant=None, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_iqi=None, update_aqi=None)
+
+    model.conv2 = QuantConv2d(6, 16, 5, weight_quant=LSQ_weight_quant_8bits, bias_quant=None,
+                              input_quant=None, output_quant=None, update_wqi=None, update_bqi=None, update_iqi=None, update_oqi=None)
     model.relu2 = QuantReLU(
-        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_iqi=None, update_aqi=None)
+
     model.fc1 = QuantLinear(16*5*5, 120, bias=True,
-                            weight_quant=None,
-                            input_quant=None, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+                            weight_quant=LSQ_weight_quant_8bits, bias_quant=None,
+                            input_quant=None, output_quant=None, update_wqi=None, update_bqi=None, update_iqi=None, update_oqi=None)
+
     model.relu3 = QuantReLU(
-        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_iqi=None, update_aqi=None)
+
     model.fc2 = QuantLinear(
-        120, 84, bias=True, weight_quant=None,
-        input_quant=None, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+        120, 84, bias=True, weight_quant=LSQ_weight_quant_8bits, bias_quant=None,
+        input_quant=None, output_quant=None, update_wqi=None, update_bqi=None, update_iqi=None, update_oqi=None)
+
     model.relu4 = QuantReLU(
-        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+        input_quant=None, act_quant=LSQ_input_quant_8bits, output_quant=None, update_iqi=None, update_aqi=None)
+
     model.fc3 = QuantLinear(
-        84, 10, bias=False, weight_quant=None,
-        input_quant=None, output_quant=None, update_wqi=None, update_iqi=None, update_oqi=None)
+        84, 10, bias=False, weight_quant=LSQ_weight_quant_8bits, bias_quant=None,
+        input_quant=None, output_quant=None, update_wqi=None, update_bqi=None, update_iqi=None, update_oqi=None)
 
     return model
