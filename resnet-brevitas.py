@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
     classes = ds.classes
 
-    model = quant_resnet.resnet18(no_quant=True, bit_width=8)
+    model = quant_resnet.resnet20(no_quant=True, bit_width=8)
     criterion = nn.CrossEntropyLoss()
     lr = 0.10
     momentum = 0.9
@@ -172,5 +172,5 @@ if __name__ == "__main__":
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=[100, 150], last_epoch=-1)
 
-    history = train(model, criterion, optimizer, train_loader,
-                    val_loader, lr_scheduler, epoch=epochs)
+  print(f'torch.cuda.is_available()): {torch.cuda.is_available()}')
+history = train(model, criterion, optimizer, train_loader, val_loader, lr_scheduler, epoch=epochs, use_gpu=torch.cuda.is_available())

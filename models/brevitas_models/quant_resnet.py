@@ -19,7 +19,7 @@ def _weights_init(m):
         nn.init.kaiming_normal_(m.weight)
 
 
-def make_qconv2d(in_planes, out_planes, kernel_size=1, padding=1, stride=1, groups=1, bias=True, no_quant=True, **kwargs) -> QuantConv2d:
+def make_qconv2d(in_planes, out_planes, kernel_size=1, padding=0, stride=1, groups=1, bias=True, no_quant=True, **kwargs) -> QuantConv2d:
     if no_quant:
         return QuantConv2d(in_channels=in_planes,
                            out_channels=out_planes,
@@ -96,12 +96,9 @@ class BasicBlock(Module):
         if stride != 1 or in_planes != out_planes:
             print((in_planes, self.expansion * out_planes, stride))
             self.shortcut = nn.Sequential(
-                PrintLayer(),
                 make_qconv2d(in_planes, self.expansion * out_planes,
                              kernel_size=1, stride=stride, bias=False),
-                PrintLayer(),
                 nn.BatchNorm2d(self.expansion * out_planes),
-                PrintLayer()
             )
 
     def forward(self, x):
@@ -124,26 +121,23 @@ class BasicBlock(Module):
 class QuantResNet(Module):
     def __init__(self, block: BasicBlock, num_blocks, num_classes=10, no_quant=True, bit_width=8):
         super(QuantResNet, self).__init__()
-        self.in_planes = 64
+        self.in_planes = 16
 
-        self.conv1 = make_qconv2d(3, 64, kernel_size=3,
+        self.conv1 = make_qconv2d(3, 16, kernel_size=3,
                                   stride=1, padding=1, bias=False, no_quant=no_quant, bit_width=bit_width)
-        self.bn1 = nn.BatchNorm2d(64)
+        self.bn1 = nn.BatchNorm2d(16)
 
         self.layer1 = self._make_layer(
-            block, 64, num_blocks[0], stride=1, no_quant=no_quant, bit_width=bit_width)
+            block, 16, num_blocks[0], stride=1, no_quant=no_quant, bit_width=bit_width)
 
         self.layer2 = self._make_layer(
-            block, 128, num_blocks[1], stride=2, no_quant=no_quant, bit_width=bit_width)
+            block, 32, num_blocks[1], stride=2, no_quant=no_quant, bit_width=bit_width)
 
         self.layer3 = self._make_layer(
-            block, 256, num_blocks[2], stride=2, no_quant=no_quant, bit_width=bit_width)
-
-        self.layer4 = self._make_layer(
-            block, 512, num_blocks[3], stride=2, no_quant=no_quant, bit_width=bit_width)
+            block, 64, num_blocks[2], stride=2, no_quant=no_quant, bit_width=bit_width)
 
         self.linear = make_qlinear(
-            512, num_classes, no_quant=no_quant, bit_width=bit_width)
+            64, num_classes, no_quant=no_quant, bit_width=bit_width)
 
         self.apply(_weights_init)
 
@@ -163,12 +157,11 @@ class QuantResNet(Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        out = self.layer4(out)
-        out = nn.functional.avg_pool2d(out, 4)
+        out = nn.functional.avg_pool2d(out, out.size()[3])
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
 
 
-def resnet18(no_quant=True, bit_width=8):
-    return QuantResNet(BasicBlock, [2, 2, 2, 2], num_classes=10, no_quant=no_quant, bit_width=bit_width)
+def resnet20(no_quant=True, bit_width=8):
+    return QuantResNet(BasicBlock, [3, 3, 3], num_classes=10, no_quant=no_quant, bit_width=bit_width)
