@@ -4,8 +4,18 @@ from brevitas.nn import QuantIdentity, QuantConv2d, QuantReLU, QuantLinear
 from brevitas.core.quant import QuantType
 
 
+class PrintLayer(nn.Module):
+    def __init__(self):
+        super(PrintLayer, self).__init__()
+
+    def forward(self, x):
+        # Do your print / debug stuff here
+        print(x.size())  # print(x.shape)
+        return x
+
+
 def _weights_init(m):
-    if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d) or issubclass(m, nn.Linear) or issubclass(m, nn.Conv2d):
+    if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d) or issubclass(type(m), nn.Linear) or issubclass(type(m), nn.Conv2d):
         nn.init.kaiming_normal_(m.weight)
 
 
@@ -84,41 +94,56 @@ class BasicBlock(Module):
         self.shortcut = nn.Sequential()
 
         if stride != 1 or in_planes != out_planes:
+            print((in_planes, self.expansion * out_planes, stride))
             self.shortcut = nn.Sequential(
+                PrintLayer(),
                 make_qconv2d(in_planes, self.expansion * out_planes,
                              kernel_size=1, stride=stride, bias=False),
-                nn.BatchNorm2d(self.expansion * out_planes)
+                PrintLayer(),
+                nn.BatchNorm2d(self.expansion * out_planes),
+                PrintLayer()
             )
 
     def forward(self, x):
+        identity = x
         out = self.conv1(x)
-        out = self.conv2(out)
-        out += self.shortcut(x)
+        out = self.bn1(out)
         out = self.act(out)
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        shortcut = self.shortcut(identity)
+
+        out += shortcut
+
+        out = self.act(out)
+
+        return out
 
 
 class QuantResNet(Module):
     def __init__(self, block: BasicBlock, num_blocks, num_classes=10, no_quant=True, bit_width=8):
         super(QuantResNet, self).__init__()
-        self.in_planes = 16
+        self.in_planes = 64
 
-        self.conv1 = make_qconv2d(3, 16, kernel_size=3,
+        self.conv1 = make_qconv2d(3, 64, kernel_size=3,
                                   stride=1, padding=1, bias=False, no_quant=no_quant, bit_width=bit_width)
-        self.bn1 = nn.BatchNorm2d(16)
+        self.bn1 = nn.BatchNorm2d(64)
 
         self.layer1 = self._make_layer(
-            block, 16, num_blocks[0], stride=1, no_quant=no_quant, bit_width=bit_width)
+            block, 64, num_blocks[0], stride=1, no_quant=no_quant, bit_width=bit_width)
 
         self.layer2 = self._make_layer(
-            block, 32, num_blocks[1], stride=2, no_quant=no_quant, bit_width=bit_width)
+            block, 128, num_blocks[1], stride=2, no_quant=no_quant, bit_width=bit_width)
 
         self.layer3 = self._make_layer(
-            block, 64, num_blocks[2], stride=2, no_quant=no_quant, bit_width=bit_width)
+            block, 256, num_blocks[2], stride=2, no_quant=no_quant, bit_width=bit_width)
+
+        self.layer4 = self._make_layer(
+            block, 512, num_blocks[3], stride=2, no_quant=no_quant, bit_width=bit_width)
 
         self.linear = make_qlinear(
-            64, num_classes, no_quant=no_quant, bit_width=bit_width)
-
-        self.act = make_qrelu(no_quant=no_quant, bit_width=bit_width)
+            512, num_classes, no_quant=no_quant, bit_width=bit_width)
 
         self.apply(_weights_init)
 
@@ -126,19 +151,24 @@ class QuantResNet(Module):
         strides = [stride] + [1]*(num_blocks-1)
         layers = []
         for stride in strides:
-            layers.append(block(in_planes=self.in_planes, out_planes=planes,
-                                stride=stride, no_quant=no_quant, bit_width=bit_width))
+            layers.append(block(in_planes=self.in_planes, out_planes=planes, stride=stride,
+                                no_quant=no_quant, bit_width=bit_width))
             self.in_planes = planes * block.expansion
 
         return nn.Sequential(*layers)
 
     def forward(self, x):
         out = self.bn1(self.conv1(x))
-        out = self.act(out)
+        out = nn.functional.relu(out)
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        out = nn.functional.avg_pool2d(out, out.size()[3])
+        out = self.layer4(out)
+        out = nn.functional.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
+
+
+def resnet18(no_quant=True, bit_width=8):
+    return QuantResNet(BasicBlock, [2, 2, 2, 2], num_classes=10, no_quant=no_quant, bit_width=bit_width)
