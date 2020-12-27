@@ -99,7 +99,7 @@ def train(model, criterion, optimizer, train_loader, val_loader, lr_scheduler, e
         t = t2 - t1
 
         # save the model
-        PATH = f'./drive/My Drive/Colab Notebooks/checkpoints/resnet18-brevitas-noquant-e{epoch + 1}.pth'
+        PATH = f'./drive/My Drive/Colab Notebooks/checkpoints/resnet20-brevitas-w8a8-e{epoch + 1}.pth'
         if epoch % 10 == 0:
             torch.save({'epoch': epoch, 'state_dict': model.state_dict(),
                         'optimizer': optimizer.state_dict(), }, PATH)
@@ -172,5 +172,6 @@ if __name__ == "__main__":
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=[100, 150], last_epoch=-1)
 
-  print(f'torch.cuda.is_available()): {torch.cuda.is_available()}')
-history = train(model, criterion, optimizer, train_loader, val_loader, lr_scheduler, epoch=epochs, use_gpu=torch.cuda.is_available())
+    print(f'torch.cuda.is_available()): {torch.cuda.is_available()}')
+    history = train(model, criterion, optimizer, train_loader, val_loader,
+                    lr_scheduler, epoch=epochs, use_gpu=torch.cuda.is_available())
